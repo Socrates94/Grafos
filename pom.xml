@@ -16,10 +16,17 @@
 
     <!-- Se agregar el repositorio y dependencias para trabajar con la libreria de GraphStreamVisualization -->
     <repositories>
+        <!-- grapstream -->
         <repository>
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
         </repository>
+
+        <!-- JgraphT -->
+<!--        <groupId>org.jgrapht</groupId>-->
+<!--        <artifactId>jgrapht-core</artifactId>-->
+<!--        <version>1.5.2</version>-->
+
     </repositories>
 
     <dependencies>
