@@ -6,47 +6,33 @@ import java.util.*;
 import org.jgrapht.graph.*;
 
 
-public class Main {
+public class Outerplanar {
 
-    public static boolean isOuterplanar(Graph<String, DefaultEdge> graph) {
-        // Verifica que no contenga un K4 ni un K2,3 como subgrafo inducido
-        return !containsK4(graph) && !containsK23(graph);
-    }
+    public static boolean isLikelyOuterplanar(Graph<String, DefaultEdge> graph) {
+        int vertexCount = graph.vertexSet().size();
+        int edgeCount = graph.edgeSet().size();
 
-    private static boolean containsK4(Graph<String, DefaultEdge> graph) {
+        // Condición necesaria básica
+        if (edgeCount > 2 * vertexCount - 3) {
+            return false;
+        }
+
+        // Verificación heurística de subgrafo K4
         List<String> vertices = new ArrayList<>(graph.vertexSet());
-
         for (int i = 0; i < vertices.size(); i++) {
             for (int j = i + 1; j < vertices.size(); j++) {
                 for (int k = j + 1; k < vertices.size(); k++) {
                     for (int l = k + 1; l < vertices.size(); l++) {
-                        Set<String> subset = Set.of(vertices.get(i), vertices.get(j), vertices.get(k), vertices.get(l));
-                        if (isK4(graph, subset)) return true;
+                        Set<String> subgraph = Set.of(vertices.get(i), vertices.get(j), vertices.get(k), vertices.get(l));
+                        if (isK4(graph, subgraph)) {
+                            return false;
+                        }
                     }
                 }
             }
         }
-        return false;
-    }
 
-    private static boolean isK4(Graph<String, DefaultEdge> graph, Set<String> subset) {
-        List<String> nodes = new ArrayList<>(subset);
-        int edgeCount = 0;
-
-        for (int i = 0; i < nodes.size(); i++) {
-            for (int j = i + 1; j < nodes.size(); j++) {
-                if (graph.containsEdge(nodes.get(i), nodes.get(j))) {
-                    edgeCount++;
-                }
-            }
-        }
-
-        return edgeCount == 6; // K4 tiene 6 aristas completamente conectadas
-    }
-
-    private static boolean containsK23(Graph<String, DefaultEdge> graph) {
-        List<String> vertices = new ArrayList<>(graph.vertexSet());
-
+        // Verificación heurística de subgrafo K2,3
         for (int a = 0; a < vertices.size(); a++) {
             for (int b = a + 1; b < vertices.size(); b++) {
                 for (int c = 0; c < vertices.size(); c++) {
@@ -56,40 +42,42 @@ public class Main {
                         for (int e = d + 1; e < vertices.size(); e++) {
                             if (e == a || e == b) continue;
 
-                            List<String> partA = List.of(vertices.get(a), vertices.get(b));
-                            List<String> partB = List.of(vertices.get(c), vertices.get(d), vertices.get(e));
+                            Set<String> left = Set.of(vertices.get(a), vertices.get(b));
+                            Set<String> right = Set.of(vertices.get(c), vertices.get(d), vertices.get(e));
 
-                            if (isK23(graph, partA, partB)) return true;
+                            if (isK23(graph, left, right)) {
+                                return false;
+                            }
                         }
                     }
                 }
             }
         }
-        return false;
+
+        return true;
     }
 
-    private static boolean isK23(Graph<String, DefaultEdge> graph, List<String> partA, List<String> partB) {
+    private static boolean isK4(Graph<String, DefaultEdge> graph, Set<String> nodes) {
+        List<String> list = new ArrayList<>(nodes);
+        int count = 0;
+        for (int i = 0; i < list.size(); i++) {
+            for (int j = i + 1; j < list.size(); j++) {
+                if (graph.containsEdge(list.get(i), list.get(j)) || graph.containsEdge(list.get(j), list.get(i))) {
+                    count++;
+                }
+            }
+        }
+        return count == 6; // Total de aristas en K4
+    }
+
+    private static boolean isK23(Graph<String, DefaultEdge> graph, Set<String> partA, Set<String> partB) {
         for (String u : partA) {
             for (String v : partB) {
-                if (!graph.containsEdge(u, v)) {
+                if (!graph.containsEdge(u, v) && !graph.containsEdge(v, u)) {
                     return false;
                 }
             }
         }
-
-        // Asegurarse de que no hay aristas dentro de cada parte
-        for (int i = 0; i < partA.size(); i++) {
-            for (int j = i + 1; j < partA.size(); j++) {
-                if (graph.containsEdge(partA.get(i), partA.get(j))) return false;
-            }
-        }
-
-        for (int i = 0; i < partB.size(); i++) {
-            for (int j = i + 1; j < partB.size(); j++) {
-                if (graph.containsEdge(partB.get(i), partB.get(j))) return false;
-            }
-        }
-
         return true;
     }
 
@@ -102,6 +90,7 @@ public class Main {
         graph.addVertex("B");
         graph.addVertex("C");
         graph.addVertex("D");
+        graph.addVertex("E");
 
         // Añadir aristas (forma un ciclo y es outerplanar)
         graph.addEdge("A", "B");
@@ -110,15 +99,21 @@ public class Main {
         graph.addEdge("D", "A");
 
         // Opcional: triangulación para hacerlo maximal (MOP)
-        graph.addEdge("A", "C");
-        graph.addEdge("B", "D");
+//        graph.addEdge("A", "E");
+//        graph.addEdge("B", "E");
+//        graph.addEdge("C", "E");
+//        graph.addEdge("D", "E");
 
-        // Validar
-        if (Main.isOuterplanar(graph)) {
+//         Validar
+        boolean esOuterplanar = Outerplanar.isLikelyOuterplanar(graph);
+//        System.out.println("¿Es outerplanar?: " + esOuterplanar);
+
+        if(esOuterplanar){
             System.out.println("✅ El grafo es outerplanar.");
-        } else {
+        }else{
             System.out.println("❌ El grafo NO es outerplanar.");
         }
+
     }
 }
 
@@ -137,6 +132,7 @@ public class Main {
 //        Node nodeB = graph.addNode("B");
 //        Node nodeC = graph.addNode("C");
 //        Node nodeD = graph.addNode("D");
+//        Node nodeE = graph.addNode("E");
 //
 //
 //        // 3. Agregar aristas
@@ -146,15 +142,21 @@ public class Main {
 //        graph.addEdge("DA", "D", "A");
 //
 //
-//        graph.addEdge("AC", "A", "C");
-//        graph.addEdge("BD", "B", "D");
+//        graph.addEdge("EA", "E", "A");
+//        graph.addEdge("EB", "E", "B");
+//        graph.addEdge("EC", "E", "C");
+//        graph.addEdge("ED", "E", "D");
 //
 //        // 4. Manipular atributos visuales
 //        nodeA.setAttribute("ui.label", "A");
 //        nodeB.setAttribute("ui.label", "B");
 //        nodeC.setAttribute("ui.label", "C");
 //        nodeD.setAttribute("ui.label", "D");
-//        graph.getEdge("BC").setAttribute("ui.style", "fill-color: blue;");
+//        nodeE.setAttribute("ui.label", "E");
+//        graph.getEdge("EA").setAttribute("ui.style", "fill-color: blue;");
+//        graph.getEdge("EB").setAttribute("ui.style", "fill-color: blue;");
+//        graph.getEdge("EC").setAttribute("ui.style", "fill-color: blue;");
+//        graph.getEdge("ED").setAttribute("ui.style", "fill-color: blue;");
 //
 //        // 5. Estilo general del grafo
 //        graph.setAttribute("ui.stylesheet",
