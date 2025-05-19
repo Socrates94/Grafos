@@ -41,9 +41,8 @@
         <dependency>
             <groupId>org.jgrapht</groupId>
             <artifactId>jgrapht-core</artifactId>
-            <version>1.5.1</version> <!-- O usa la última versión estable -->
+            <version>1.5.2</version>
         </dependency>
-
 
     </dependencies>
 

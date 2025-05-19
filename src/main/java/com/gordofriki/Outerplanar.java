@@ -83,15 +83,25 @@ public class Outerplanar {
         return true;
     }
 
-    public static <V, E> void triangulateOuterplanar(Graph<V, E> graph) {
-        List<V> vertices = new ArrayList<>(graph.vertexSet());
+    public static <V, E> void triangulateCycle(Graph<V, E> graph, List<V> orderedCycle) {
+        V anchor = orderedCycle.get(0);
+        int n = orderedCycle.size();
 
-        // Si ya es un ciclo simple (C_n), añade diagonales sin cruzarlas
-        for (int i = 0; i < vertices.size() - 2; i++) {
-            for (int j = i + 2; j < vertices.size(); j++) {
-                if ((i == 0 && j == vertices.size() - 1)) continue; // Evita cerrar el ciclo por el otro extremo
-                if (!graph.containsEdge(vertices.get(i), vertices.get(j))) {
-                    System.out.println(graph.addEdge(vertices.get(i), vertices.get(j)));;
+        System.out.println("Triangulando ciclo: ");
+        for (int i = 2; i < n - 1; i++) {
+            V target = orderedCycle.get(i);
+            if (!graph.containsEdge(anchor, target)) {
+                graph.addEdge(anchor, target);
+                System.out.println("Added edge: (" + anchor + " : " + target + ")");
+
+                // Buscar triángulo
+                Set<V> neighborsAnchor = Graphs.neighborSetOf(graph, anchor);
+                Set<V> neighborsTarget = Graphs.neighborSetOf(graph, target);
+
+                for (V common : neighborsAnchor) {
+                    if (neighborsTarget.contains(common)) {
+                        System.out.println("Triángulo: (" + anchor + ", " + target + ", " + common + ")");
+                    }
                 }
             }
         }
@@ -193,7 +203,6 @@ public class Outerplanar {
 //
 //        return dp;
 //    }
-
     public static Map<Triangulo, DPResult> computeMISDP(Graph<Triangulo, DefaultEdge> dualTree, List<Triangulo> postOrder) {
         Map<Triangulo, DPResult> dp = new HashMap<>();
 
@@ -240,19 +249,31 @@ public class Outerplanar {
         Graph<String, DefaultEdge> graph = new SimpleGraph<>(DefaultEdge.class);
 
         // Añadir nodos
-        graph.addVertex("A");
-        graph.addVertex("B");
-        graph.addVertex("C");
-        graph.addVertex("D");
-        graph.addVertex("E");
+//        graph.addVertex("A");
+//        graph.addVertex("B");
+//        graph.addVertex("C");
+//        graph.addVertex("D");
+//        //graph.addVertex("E");
+
+        String[] vertices = {"A", "B", "C", "D"};
+        for (char c = 'A'; c <= 'D'; c++) {
+            graph.addVertex(String.valueOf(c));
+        }
 
         // Añadir aristas (forma un ciclo y es outerplanar)
+//        graph.addEdge("A", "B");
+//        graph.addEdge("B", "C");
+//        graph.addEdge("C", "D");
+//        graph.addEdge("D", "A");
+ //       graph.addEdge("E", "A");
+
         graph.addEdge("A", "B");
         graph.addEdge("B", "C");
         graph.addEdge("C", "D");
         graph.addEdge("D", "A");
 
-        // Opcional: triangulación para hacerlo maximal (MOP)
+
+//        // Opcional: triangulación para hacerlo maximal (MOP)
 //        graph.addEdge("A", "E");
 //        graph.addEdge("B", "E");
 //        graph.addEdge("C", "E");
@@ -265,7 +286,9 @@ public class Outerplanar {
         if(esOuterplanar){
             System.out.println("✅ El grafo es outerplanar.");
 
-            triangulateOuterplanar(graph);
+            List<String> orderedCycle = Arrays.asList("A", "B", "C", "D", "E");
+            triangulateCycle(graph,orderedCycle);
+
             Graph<Triangulo, DefaultEdge> dualTree = buildDualTree(graph);
             List<Triangulo> dfsOrder = dfsPostOrder(dualTree);
 
@@ -273,7 +296,6 @@ public class Outerplanar {
             for (Triangulo t : dfsOrder) {
                 System.out.println(t);
             }
-
 
             Map<Triangulo, DPResult> results = computeMISDP(dualTree, dfsOrder);
 
@@ -302,53 +324,3 @@ public class Outerplanar {
 }
 
 
-//import org.graphstream.graph.*;
-//import org.graphstream.graph.implementations.*;
-//
-//public class Main {
-//
-//    public static void main(String[] args) {
-//        // 1. Crear un grafo
-//        Graph graph = new SingleGraph("Mi Grafo");
-//
-//        // 2. Agregar nodos
-//        Node nodeA = graph.addNode("A");
-//        Node nodeB = graph.addNode("B");
-//        Node nodeC = graph.addNode("C");
-//        Node nodeD = graph.addNode("D");
-//        Node nodeE = graph.addNode("E");
-//
-//
-//        // 3. Agregar aristas
-//        graph.addEdge("AB", "A", "B");
-//        graph.addEdge("BC", "B", "C");
-//        graph.addEdge("CD", "C", "D");
-//        graph.addEdge("DA", "D", "A");
-//
-//
-//        graph.addEdge("EA", "E", "A");
-//        graph.addEdge("EB", "E", "B");
-//        graph.addEdge("EC", "E", "C");
-//        graph.addEdge("ED", "E", "D");
-//
-//        // 4. Manipular atributos visuales
-//        nodeA.setAttribute("ui.label", "A");
-//        nodeB.setAttribute("ui.label", "B");
-//        nodeC.setAttribute("ui.label", "C");
-//        nodeD.setAttribute("ui.label", "D");
-//        nodeE.setAttribute("ui.label", "E");
-//        graph.getEdge("EA").setAttribute("ui.style", "fill-color: blue;");
-//        graph.getEdge("EB").setAttribute("ui.style", "fill-color: blue;");
-//        graph.getEdge("EC").setAttribute("ui.style", "fill-color: blue;");
-//        graph.getEdge("ED").setAttribute("ui.style", "fill-color: blue;");
-//
-//        // 5. Estilo general del grafo
-//        graph.setAttribute("ui.stylesheet",
-//                "node { size: 20px; fill-color: red; } " +
-//                        "edge { size: 2px; } " +
-//                        "node#B { fill-color: green; }");
-//
-//        // 6. Visualizar el grafo
-//        graph.display();
-//    }
-//}
