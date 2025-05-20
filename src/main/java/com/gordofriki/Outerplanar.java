@@ -248,29 +248,22 @@ public class Outerplanar {
         // Crear el grafo
         Graph<String, DefaultEdge> graph = new SimpleGraph<>(DefaultEdge.class);
 
-        // Añadir nodos
-//        graph.addVertex("A");
-//        graph.addVertex("B");
-//        graph.addVertex("C");
-//        graph.addVertex("D");
-//        //graph.addVertex("E");
 
-        String[] vertices = {"A", "B", "C", "D"};
-        for (char c = 'A'; c <= 'D'; c++) {
-            graph.addVertex(String.valueOf(c));
-        }
+        // Vértices del K4
+        graph.addVertex("A");
+        graph.addVertex("B");
+        graph.addVertex("C");
+        graph.addVertex("D");
 
-        // Añadir aristas (forma un ciclo y es outerplanar)
-//        graph.addEdge("A", "B");
-//        graph.addEdge("B", "C");
-//        graph.addEdge("C", "D");
-//        graph.addEdge("D", "A");
- //       graph.addEdge("E", "A");
-
+        // Aristas completas (todos conectados con todos)
         graph.addEdge("A", "B");
+        graph.addEdge("A", "C");
+        graph.addEdge("A", "D");
         graph.addEdge("B", "C");
+        graph.addEdge("B", "D");
         graph.addEdge("C", "D");
-        graph.addEdge("D", "A");
+
+        System.out.println("Grafo K4 generado. Debería ser rechazado por outerplanaridad.");
 
 
 //        // Opcional: triangulación para hacerlo maximal (MOP)
@@ -279,9 +272,8 @@ public class Outerplanar {
 //        graph.addEdge("C", "E");
 //        graph.addEdge("D", "E");
 
-//         Validar
+        //Validar
         boolean esOuterplanar = Outerplanar.isLikelyOuterplanar(graph);
-//        System.out.println("¿Es outerplanar?: " + esOuterplanar);
 
         if(esOuterplanar){
             System.out.println("✅ El grafo es outerplanar.");
@@ -319,8 +311,75 @@ public class Outerplanar {
         }
 
 
-
     }
 }
+
+        //Prueba 1 Ciclo simple C5
+//        String[] vertices = {"A", "B", "C", "D", "E"};
+//        for (char c = 'A'; c <= 'E'; c++) {
+//            graph.addVertex(String.valueOf(c));
+//        }
+//
+//
+//        graph.addEdge("A", "B");
+//        graph.addEdge("B", "C");
+//        graph.addEdge("C", "D");
+//        graph.addEdge("D", "E");
+//        graph.addEdge("E", "A");
+
+
+            //MOP con 6 o 7 aristas
+//        String[] vertices = {"A", "B", "C", "D", "E", "F", "G"};
+//        for (char c = 'A'; c <= 'G'; c++) {
+//            graph.addVertex(String.valueOf(c));
+//        }
+//
+//        // Aristas del ciclo
+//        graph.addEdge("A", "B");
+//        graph.addEdge("B", "C");
+//        graph.addEdge("C", "D");
+//        graph.addEdge("D", "E");
+//        graph.addEdge("E", "F");
+//        graph.addEdge("F", "G");
+//        graph.addEdge("G", "A");
+//
+//// Diagonales (para formar el MOP)
+//        graph.addEdge("A", "C");
+//        graph.addEdge("A", "D");
+//        graph.addEdge("A", "E");
+
+
+// Grafo outerplanar de 10 vertices
+// Añadir vértices A–J (10 vértices)
+//String[] vertices = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J"};
+//        for (String v : vertices) {
+//        graph.addVertex(v);
+//        }
+//
+//                // Añadir aristas del ciclo (C10)
+//                graph.addEdge("A", "B");
+//        graph.addEdge("B", "C");
+//        graph.addEdge("C", "D");
+//        graph.addEdge("D", "E");
+//        graph.addEdge("E", "F");
+//        graph.addEdge("F", "G");
+//        graph.addEdge("G", "H");
+//        graph.addEdge("H", "I");
+//        graph.addEdge("I", "J");
+//        graph.addEdge("J", "A");
+//
+//// Añadir diagonales para convertirlo en MOP (desde A)
+//        graph.addEdge("A", "C");
+//        graph.addEdge("A", "D");
+//        graph.addEdge("A", "E");
+//        graph.addEdge("A", "F");
+//        graph.addEdge("A", "G");
+//        graph.addEdge("A", "H");
+//        graph.addEdge("A", "I");
+//
+//// Total de aristas = 10 (ciclo) + 7 (diagonales) = 17
+//// 2n – 3 = 2*10 – 3 = 17 → ✅ MOP válido
+//
+//        System.out.println("Grafo MOP con 10 vértices listo.");
 
 
