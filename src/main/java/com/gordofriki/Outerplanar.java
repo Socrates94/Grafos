@@ -9,6 +9,7 @@ import org.jgrapht.graph.*;
 
 public class Outerplanar {
 
+    // Kuratowski
     public static boolean isLikelyOuterplanar(Graph<String, DefaultEdge> graph) {
         int vertexCount = graph.vertexSet().size();
         int edgeCount = graph.edgeSet().size();
@@ -58,28 +59,41 @@ public class Outerplanar {
         return true;
     }
 
+    //valida si hay un subgrafo K4 en el grafo
     private static boolean isK4(Graph<String, DefaultEdge> graph, Set<String> nodes) {
+        //se convierte el conjunto de nodos en una lista para poder iterarlo
         List<String> list = new ArrayList<>(nodes);
-        int count = 0;
+        //guarda el numero de aristas encontradas en el subgrafo
+        int countEdge = 0;
+
         for (int i = 0; i < list.size(); i++) {
+
             for (int j = i + 1; j < list.size(); j++) {
                 if (graph.containsEdge(list.get(i), list.get(j)) || graph.containsEdge(list.get(j), list.get(i))) {
-                    count++;
+                    //si encuentra una arista entre dos nodos del subgrafo K4, se suma 1 al contador
+                    countEdge++;
                 }
             }
         }
-        return count == 6; // Total de aristas en K4
+        return countEdge == 6; // Total de aristas en K4
     }
 
+    //valida si es un grafo bipartito
     private static boolean isK23(Graph<String, DefaultEdge> graph, Set<String> partA, Set<String> partB) {
 
+        //el bucle recorre las aristas del grafo
+        // y comprueba que no existan aristas entre ambos conjuntos de vertices {u, v}, {v, u}
         for (String u : partA) {
             for (String v : partB) {
+                //Comprobamos que no exista una arista entre ambos vertices
                 if (!graph.containsEdge(u, v) && !graph.containsEdge(v, u)) {
+                    //Si no existe una arista entre ambos vertices no encuenra un subgrafo bipartito
                     return false;
                 }
             }
         }
+
+        //si encontro aristas entre vertices es k23
         return true;
     }
 
@@ -90,6 +104,7 @@ public class Outerplanar {
         System.out.println("Triangulando ciclo: ");
         for (int i = 2; i < n - 1; i++) {
             V target = orderedCycle.get(i);
+            //si no existe una arista para poder triangular
             if (!graph.containsEdge(anchor, target)) {
                 graph.addEdge(anchor, target);
                 System.out.println("Added edge: (" + anchor + " : " + target + ")");
@@ -171,6 +186,7 @@ public class Outerplanar {
         visited.add(current);
 
         for (DefaultEdge edge : dualTree.edgesOf(current)) {
+
             Triangulo neighbor = Graphs.getOppositeVertex(dualTree, edge, current);
             if (!visited.contains(neighbor)) {
                 dfsHelper(dualTree, neighbor, visited, postOrder);
@@ -249,26 +265,24 @@ public class Outerplanar {
         Graph<String, DefaultEdge> graph = new SimpleGraph<>(DefaultEdge.class);
 
 
-        // Vértices del K4
-        graph.addVertex("A");
-        graph.addVertex("B");
-        graph.addVertex("C");
-        graph.addVertex("D");
+        //Prueba 1 Ciclo simple C5
+        String[] vertices = {"A", "B", "C", "D", "E", "F"};
+        for (char c = 'A'; c <= 'F'; c++) {
+            graph.addVertex(String.valueOf(c));
+        }
 
-        // Aristas completas (todos conectados con todos)
+
         graph.addEdge("A", "B");
+        graph.addEdge("B", "C");
+        graph.addEdge("C", "D");
+        graph.addEdge("D", "E");
+        graph.addEdge("E", "F");
+        graph.addEdge("F", "A");
+
+
+        // Opcional: triangulación para hacerlo maximal (MOP)
         graph.addEdge("A", "C");
         graph.addEdge("A", "D");
-        graph.addEdge("B", "C");
-        graph.addEdge("B", "D");
-        graph.addEdge("C", "D");
-
-        System.out.println("Grafo K4 generado. Debería ser rechazado por outerplanaridad.");
-
-
-//        // Opcional: triangulación para hacerlo maximal (MOP)
-//        graph.addEdge("A", "E");
-//        graph.addEdge("B", "E");
 //        graph.addEdge("C", "E");
 //        graph.addEdge("D", "E");
 
@@ -278,7 +292,7 @@ public class Outerplanar {
         if(esOuterplanar){
             System.out.println("✅ El grafo es outerplanar.");
 
-            List<String> orderedCycle = Arrays.asList("A", "B", "C", "D", "E");
+            List<String> orderedCycle = Arrays.asList("A", "B", "C", "D", "E", "F");
             triangulateCycle(graph,orderedCycle);
 
             Graph<Triangulo, DefaultEdge> dualTree = buildDualTree(graph);
